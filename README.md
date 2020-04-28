@@ -1,8 +1,8 @@
 # 安装
 首次使用请自行安装 Python 和 pip 并执行以下命令
-```python
-pip install \-\-upgrade pip
-pip install \-r requirements.txt
+```
+pip install --upgrade pip
+pip install -r requirements.txt
 ```
 # 使用教程
 - ## 配置文件介绍
