@@ -8,7 +8,7 @@ pip install -r requirements.txt
 ```
 3. 运行
 ```
-python 稳健OJ命令行版.py
+python OnlineJudge-command.py
 ```
 ## 使用教程
 - ### 配置文件介绍
