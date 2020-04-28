@@ -74,8 +74,8 @@ def menu():
             print("帮助中心:")
             print("cookie     重新获取 cookie")
             print("info       获取基本信息")
+            print("problem    题目列表")
             print("signin     签到")
-            print("problem    做题")
             print("exit       退出")
             print("cls        清屏\n")
         elif into == "cookie":
@@ -97,7 +97,7 @@ def menu():
 
 #获取用户名和密码
 def get_username_password():
-    global data,error
+    global data,error,username,password
     if username != "" and password != "" and error == 0: data = {"username":username,"password":password}
     else:
         print(localtime_error()+"请输入账号和密码")
@@ -129,6 +129,7 @@ def post_login():
         print(localtime_error(),end = "")
         into = input("登录失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
         if into == "Y" or into == "":
+            post_login()
             get_cookies()
             check_cookies()
         else:exit()
@@ -152,6 +153,13 @@ def check_cookies():
         requests2 = requests.get(url=info,headers=headers1)
         get2 = json.loads(requests2.text)
         try: name = get2["data"]["user"]["username"]
+        except:
+            print(localtime_error(),end = "")
+            into = input("登录失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
+            if into == "Y" or into == "":
+                get_cookies()
+                check_cookies()
+            else:exit()
 
 #获取 cookies
 def get_cookies():
@@ -297,6 +305,7 @@ def problem_list():
         if into == "menu":
             page = 1
             menu()
+        elif into == "help": print(localtime_info()+"\n进入问题请输入题号\nmenu     返回菜单\npage:     页码跳转指定页码\ncls     清屏\nexit     退出")
         elif into == "exit": exit()
         elif into == "cls": os.system("cls")
         elif len(into) > 5 and into[:5] == "page:" and into[5:].isdigit() and int(into[5:]) > 0 and int(into[5:]) <= total:
@@ -330,13 +339,14 @@ def problem_info():
     for x1 in range(-2,8):
         try: print(color(x1)+":",get5["data"]["results"][problem_id]["statistic_info"][str(x1)]+" ",end="")
         except: continue
-    print("\n"+localtime_info()+"\n提交 post\n返回问题列表 back\n返回菜单 menu\n退出 exit")
+    print("\n")
     while True:
         print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m",end="")
         into = input(">")
         if into == "menu":
             page = 1
             menu()
+        if into == "help": print(localtime_info()+"\npost     提交\nback     返回问题列表\nmenu     返回菜单\ncls     清屏\nexit     退出")
         elif into == "exit": exit()
         elif into == "back": problem_list()
         elif into == "post": post_problem()
@@ -407,9 +417,8 @@ def submission(submission_id):
             print(submission_list)
         print("提交id:",get7["data"]["id"])
         print("提交时间:",get7["data"]["create_time"][:10],get7["data"]["create_time"][11:19])
-        print("代码:\n",get7["data"]["code"])
+        print("代码:\n"+get7["data"]["code"])
         print("分享状态:",get7["data"]["shared"])
-        print(localtime_info()+"\n切换分享状态 change\n返回问题详细 problem_info\n返回问题列表 problem_list\n返回菜单 menu\n退出 exit")
         while True:
             print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m",end="")
             into = input(">")
@@ -417,6 +426,7 @@ def submission(submission_id):
                 page = 1
                 menu()
             elif into == "exit": exit()
+            elif into == "help":print(localtime_info()+"change     切换分享状态\nproblem_info 返回问题详细\nproblem_list  返回问题列表\nmenu     返回菜单\ncls       清屏\nexit     退出")
             elif into == "cls": os.system("cls")
             elif into == "change":
                 if get7["data"]["shared"]: data2 = {"id":submission_id,"shared":False}
