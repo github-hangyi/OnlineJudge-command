@@ -1,4 +1,4 @@
-## 一个青岛OJ[OnlineJudge](https://github.com/QingdaoU/OnlineJudge)的命令行版！
+## 一个[青岛OnlineJudge](https://github.com/QingdaoU/OnlineJudge)的命令行版！
 ## 安装
 1. 下载此代码
 2. 首次使用请自行安装 Python 和 pip 并执行以下命令
