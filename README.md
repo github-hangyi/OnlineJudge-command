@@ -26,41 +26,41 @@ python OnlineJudge-command.py
   cookies = 
 ```
 - ##  主页面[menu]
-  ```console
-  $help
-  帮助中心:
-  cookie    重新获取 cookie
-  info      获取基本信息
-  problem   题目列表
-  signin    签到
-  cls       清屏
-  exit      退出
-  ```
+```console
+$help
+帮助中心:
+cookie    重新获取 cookie
+info      获取基本信息
+problem   题目列表
+signin    签到
+cls       清屏
+exit      退出
+```
 - ## 题目列表[problem list]
-  ```console
-  $help
-  进入问题请输入题号
-  menu     返回菜单
-  page:    页码跳转指定页码
-  cls      清屏
-  exit     退出
-  ```
+```console
+$help
+进入问题请输入题号
+menu     返回菜单
+page:    页码跳转指定页码
+cls      清屏
+exit     退出
+```
 - ## 问题详细[problem info]
-  ```console
-  $help
-  post     提交
-  back     返回问题列表
-  menu     返回菜单
-  cls      清屏
-  exit     退出
-  ```
+```console
+$help
+post     提交
+back     返回问题列表
+menu     返回菜单
+cls      清屏
+exit     退出
+```
 - ## 提交状态[submission]
-  ```console
-  $help
-  change        切换分享状态
-  problem_info  返回问题详细
-  problem_list  返回问题列表
-  menu          返回菜单
-  cls           清屏
-  exit          退出 
-  ```
+```console
+$help
+change        切换分享状态
+problem_info  返回问题详细
+problem_list  返回问题列表
+menu          返回菜单
+cls           清屏
+exit          退出 
+```
