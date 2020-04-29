@@ -370,14 +370,14 @@ def post_problem():
         language = "C++"
         print(localtime_info()+"已选择:",language)
     try:
-        with open("code.cpp",mode="r",encoding="utf-8") as code:
+        with open("code",mode="r",encoding="utf-8") as code:
             print(localtime_info(),end="")
-            b = input("已找到 code.cpp,是(Y)否(N)使用?默认Y:")
+            b = input("已找到 code,是(Y)否(N)使用?默认Y:")
             if b == "N": problem_info()
             else: codes = code.read()
     except:
-        print(localtime_error()+"未找到 code.cpp,正在创建......")
-        with open("code.cpp", mode="w",encoding="utf-8"): print(localtime_info()+"创建成功!")
+        print(localtime_error()+"未找到 code,正在创建......")
+        with open("code", mode="w",encoding="utf-8"): print(localtime_info()+"创建成功!")
         post_problem()
     data1 = {"problem_id":id,"language":language,"code":codes}
     requests6 = requests.post(url=tj_problem,json=data1,headers=headers1)
