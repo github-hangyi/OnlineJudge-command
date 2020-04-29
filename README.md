@@ -42,7 +42,7 @@ python OnlineJudge-command.py
   #无需配置 
   cookies = 
 ```
-- ##  主页面[menu]
+- ##  主页面 [menu]
 ```
 $help
 帮助中心:
@@ -53,7 +53,7 @@ signin    签到
 cls       清屏
 exit      退出
 ```
-- ## 题目列表[problem list]
+- ## 题目列表 [problem list]
 ```
 $help
 进入问题请输入题号
@@ -62,7 +62,7 @@ page:    页码跳转指定页码
 cls      清屏
 exit     退出
 ```
-- ## 问题详细[problem info]
+- ## 问题详细 [problem info]
 ```
 $help
 post     提交
@@ -71,7 +71,7 @@ menu     返回菜单
 cls      清屏
 exit     退出
 ```
-- ## 提交状态[submission]
+- ## 提交状态 [submission]
 ```
 $help
 change        切换分享状态
