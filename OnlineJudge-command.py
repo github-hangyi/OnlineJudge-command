@@ -53,6 +53,8 @@ sighin = url+"/api/sighin"
 #获取问题地址
 gt_problem = url+"/api/problem?"
 tj_problem = url+"/api/submission?id="
+#获取公告地址
+announcement = url+"/api/announcement?offset=0&limit=10"
 
 #主菜单
 def menu():
