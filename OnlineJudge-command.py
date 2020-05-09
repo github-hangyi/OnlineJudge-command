@@ -17,13 +17,14 @@ headers = {"Content-Type":"application/json;charset=utf-8",
     "X-CSRFToken": "dvTfFYvCObIY7toKDE3NQI2PicjSo7Pisub1wuRhwLHBHODSbjJjWRw103eVeK6T",
     "Connection":"close"
     }
-dir = os.getcwd()
+#dir = os.getcwd()
+dir = "G:\\Users\\Desktop\\我的文件\\config.ini"
 config = configparser.RawConfigParser()
-config.read(dir+"\\config.ini")
+config.read(dir,encoding="utf-8")
 
 if config.has_option("config","url") and config.has_option("config","auto_signin") and config.has_option("config","username") and config.has_option("config","password") and config.has_option("config","cookies"): error = 0
 else:
-    print("config.ini 文件出错,正在重新创建......")
+    print(localtime_error()+"config.ini 文件出错,正在重新创建......")
     config.add_section("config")
     config["config"] = {"url":"",
     "auto_signin":"0",
@@ -31,7 +32,7 @@ else:
     "password":"",
     "cookies":"",
     }
-    with open("config.ini","w",encoding="utf-8") as configfile: config.write(configfile)
+    with open(dir,"w",encoding="utf-8") as configfile: config.write(configfile)
 if config["config"]["url"] != "" and config["config"]["auto_signin"] != "" and config["config"]["username"] != "" and config["config"]["password"] != "":
     url = config["config"]["url"]
     cookie = config["config"]["cookies"]
@@ -58,11 +59,11 @@ announcement = url+"/api/announcement?offset=0&limit=10"
 
 #主菜单
 def menu():
-    global error,get2
-    if auto_signin == 1:
+    global error,get2,auto_signin
+    if auto_signin == "1":
         print(localtime_info()+"自动签到模式已开启")
-        get_sign()
         post_sign()
+        get_sign()
         exit()
     else: print(localtime_info()+"自动签到模式已关闭")
     print(localtime_info()+"欢迎来到主菜单,请输入指令,查看帮助请输 help")
@@ -88,8 +89,8 @@ def menu():
             get_info()
         elif into == "signin":
             os.system("cls")
-            get_sign()
             post_sign()
+            get_sign()
         elif into == "problem":
             os.system("cls")
             problem_list()
@@ -99,7 +100,7 @@ def menu():
 
 #获取用户名和密码
 def get_username_password():
-    global data,error,username,password
+    global data,error,username,password,dir
     if username != "" and password != "" and error == 0: data = {"username":username,"password":password}
     else:
         print(localtime_error()+"请输入账号和密码")
@@ -109,7 +110,7 @@ def get_username_password():
             error = 0
             config.set("config","username",username)
             config.set("config","password",password)
-            with open("config.ini", mode="w",encoding="utf-8") as userword: config.write(userword)
+            with open(dir, mode="w",encoding="utf-8") as userword: config.write(userword)
         else:
             print(localtime_error()+"输入错误!请重新输入\n")
             error = 1
@@ -128,13 +129,8 @@ def post_login():
         exit()
     if post1["data"] == "Succeeded": print(localtime_info()+"登录成功")
     else:
-        print(localtime_error(),end = "")
-        into = input("登录失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
-        if into == "Y" or into == "":
-            post_login()
-            get_cookies()
-            check_cookies()
-        else:exit()
+        print(localtime_error()+"登录失败,请检查 config.ini 文件")
+        exit()
 
 #检查 cookies
 def check_cookies():
@@ -156,16 +152,12 @@ def check_cookies():
         get2 = json.loads(requests2.text)
         try: name = get2["data"]["user"]["username"]
         except:
-            print(localtime_error(),end = "")
-            into = input("登录失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
-            if into == "Y" or into == "":
-                get_cookies()
-                check_cookies()
-            else:exit()
+            get_cookies()
+            check_cookies()
 
 #获取 cookies
 def get_cookies():
-    global config,dir,cookie
+    global config,cookie,dir
     post_login()
     cookies = requests.utils.dict_from_cookiejar(requests1.cookies)
     csrftoken = cookies["csrftoken"]
@@ -173,7 +165,7 @@ def get_cookies():
     cookie = "csrftoken="+csrftoken+";sessionid="+sessionid
     #写入cookie到文件
     config.set("config","cookies",cookie)
-    with open("config.ini","w",encoding="utf-8") as cookies:
+    with open(dir,"w",encoding="utf-8") as cookies:
         config.write(cookies)
         print(localtime_info()+"获取 cookie 成功!")
 
@@ -212,17 +204,12 @@ def get_info():
         print(localtime_info()+"总成绩:",get2["data"]["total_score"])
         print(localtime_info()+"提交编号:",get2["data"]["submission_number"])
     else:
-        print(localtime_error(),end = "")
-        into = input("获取失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
-        if into == "Y" or into == "":
-            get_cookies()
-            check_cookies()
-        else:exit()
+        get_cookies()
+        check_cookies()
 
 #用 get 方法获取签到状态
 def get_sign():
     global requests3,get3,error
-    print("\033[0;30m++++++++++++++++++++++++++++++++\033[1;34m[signin]\033[0m")
     requests3 = requests.get(url=sighin,headers=headers1)
     get3 = json.loads(requests3.text)
     print(localtime_info()+"查询签到状态中......")
@@ -235,12 +222,24 @@ def get_sign():
         print(localtime_info()+"最后签到时间:",get3["data"]["last_sighin_time"])
         print(localtime_info()+"登录状态:",sighinstatus)
     else:
-        print(localtime_error(),end = "")
-        into = input("获取失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
-        if into == "Y" or into == "":
-            get_cookies()
-            check_cookies()
-        else:exit()
+        get_cookies()
+        check_cookies()
+
+#用 post 方法实现签到
+def post_sign():
+    global requests4,post4
+    print("\033[0;30m++++++++++++++++++++++++++++++++\033[1;34m[signin]\033[0m")
+    requests4 = requests.post(url=sighin,headers=headers1)
+    post4 = json.loads(requests4.text)
+    if post4["data"] == "Singined":
+        print(localtime_info()+"稳健佬,您已经签过到了呀~明天再来哦")
+    elif post4["data"]["info"] == "Success":
+        print(localtime_info()+"签到成功！")
+        print(localtime_info()+"获得稳点:",post4["data"]["experience"])
+        print(localtime_info()+"当前等级:",get_level())
+    else:
+        get_cookies()
+        check_cookies()
 
 #计算等级
 def get_level():
@@ -253,25 +252,6 @@ def get_level():
     elif level >= 5000 and level <= 9999: level ="\033[1;41m程序猿\033[0m"
     else: level = "\033[1;40m攻城狮\033[0m"
     return level
-
-#用 post 方法实现签到
-def post_sign():
-    global requests4,post4,error
-    requests4 = requests.post(url=sighin,headers=headers1)
-    post4 = json.loads(requests4.text)
-    if post4["data"] == "Singined":
-        print(localtime_info()+"稳健佬,您已经签过到了呀~明天再来哦")
-    elif post4["data"]["info"] == "Success":
-        print(localtime_info()+"签到成功！")
-        print(localtime_info()+"获得稳点:",post4["data"]["experience"])
-        print(localtime_info()+"当前等级:",get_level())
-    else:
-        print(localtime_error(),end = "")
-        into = input("获取失败,是(Y)否(N)否重新获取 cookies？默认是(Y):")
-        if into == "Y" or into == "":
-            get_cookies()
-            check_cookies()
-        else:exit()
 
 limit = 20
 page = 1
