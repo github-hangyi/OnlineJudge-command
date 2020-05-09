@@ -1,3 +1,4 @@
+'''By hangyi'''
 # -*- coding:utf-8 -*-
 #导入库
 import requests,json,os,time,getpass,prettytable,colorama,configparser
@@ -283,6 +284,7 @@ def problem_list():
     print(localtime_info()+"进入问题请输入题号,返回菜单(menu),跳转指定页码(page:页码),退出(exit)")
     while True:
         print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m",end="")
+        '''By hangyi'''
         into = input(">")
         if into == "menu":
             page = 1
@@ -382,6 +384,7 @@ def submission(submission_id):
             print(localtime_error()+"错误信息:",get7["data"]["statistic_info"]["err_info"])
         else:
             print(localtime_info()+"时间:{}ms   内存:{}MB   语言:{}   提交者:{}".format(get7["data"]["statistic_info"]["time_cost"],get7["data"]["statistic_info"]["memory_cost"]//1048576,get7["data"]["language"],get7["data"]["username"]))
+            '''By hangyi'''
             print(localtime_info()+"各个评测点状态:")
             submission_list = prettytable.PrettyTable(["ID","状态","内存","CPU用时","真实时间","分数","返回值"])
             id = 0
@@ -409,6 +412,7 @@ def submission(submission_id):
                 menu()
             elif into == "exit": exit()
             elif into == "help":print(localtime_info()+"change     切换分享状态\nproblem_info 返回问题详细\nproblem_list  返回问题列表\nmenu     返回菜单\ncls       清屏\nexit     退出")
+            '''By hangyi'''
             elif into == "cls": os.system("cls")
             elif into == "change":
                 if get7["data"]["shared"]: data2 = {"id":submission_id,"shared":False}
