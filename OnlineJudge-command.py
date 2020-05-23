@@ -17,30 +17,27 @@ headers = {"Content-Type":"application/json;charset=utf-8",
     "X-CSRFToken": "dvTfFYvCObIY7toKDE3NQI2PicjSo7Pisub1wuRhwLHBHODSbjJjWRw103eVeK6T",
     "Connection":"close"
     }
-#dir = os.getcwd()
-dir = "G:\\Users\\Desktop\\我的文件\\config.ini"
+cmddir = os.getcwd()
+cmddir = cmddir+"\\config.ini"
 config = configparser.RawConfigParser()
-config.read(dir,encoding="utf-8")
+config.read(cmddir,encoding="utf-8")
 
-if config.has_option("config","url") and config.has_option("config","auto_signin") and config.has_option("config","username") and config.has_option("config","password") and config.has_option("config","cookies"): error = 0
+if config.has_option("config","url") and config.has_option("config","auto_signin") and config.has_option("config","cookies"):error = 0
 else:
     print(localtime_error()+"config.ini 文件出错,正在重新创建......")
     config.add_section("config")
-    config["config"] = {"url":"",
-    "auto_signin":"0",
-    "username":"",
-    "password":"",
-    "cookies":"",
-    }
-    with open(dir,"w",encoding="utf-8") as configfile: config.write(configfile)
-if config["config"]["url"] != "" and config["config"]["auto_signin"] != "" and config["config"]["username"] != "" and config["config"]["password"] != "":
+    config["config"] = {"url":"","auto_signin":"0","cookies":""}
+    with open(cmddir,"w",encoding="utf-8") as configfile: config.write(configfile)
+    print(localtime_info()+"创建成功")
+
+if config["config"]["url"] != "" and config["config"]["auto_signin"] != "":
     url = config["config"]["url"]
     cookie = config["config"]["cookies"]
     auto_signin = config["config"]["auto_signin"]
-    username = config["config"]["username"]
-    password = config["config"]["password"]
 else:
     print(localtime_error()+"!!!!!!请先配置 config.ini!!!!!!")
+    print(cmddir)
+    print(localtime_error()+"运行错误！正在退出！！")
     exit()
 cookie = config["config"]["cookies"]
 #错误
@@ -64,6 +61,7 @@ def menu():
         print(localtime_info()+"自动签到模式已开启")
         post_sign()
         get_sign()
+        print(localtime_error()+"运行错误！正在退出！！")
         exit()
     else: print(localtime_info()+"自动签到模式已关闭")
     print(localtime_info()+"欢迎来到主菜单,请输入指令,查看帮助请输 help")
@@ -95,42 +93,31 @@ def menu():
             os.system("cls")
             problem_list()
         elif into == "cls": os.system("cls")
-        elif into == "exit": exit()
+        elif into == "exit":
+            print(localtime_error()+"运行错误！正在退出！！")
+            exit()
         else: print(localtime_error()+"输入无效,请重新输入")
-
-#获取用户名和密码
-def get_username_password():
-    global data,error,username,password,dir
-    if username != "" and password != "" and error == 0: data = {"username":username,"password":password}
-    else:
-        print(localtime_error()+"请输入账号和密码")
-        username = input("账号:")
-        password = getpass.getpass("密码:")
-        if name != "" and word != "":
-            error = 0
-            config.set("config","username",username)
-            config.set("config","password",password)
-            with open(dir, mode="w",encoding="utf-8") as userword: config.write(userword)
-        else:
-            print(localtime_error()+"输入错误!请重新输入\n")
-            error = 1
-            get_username_password()
 
 #登录
 def post_login():
-    global requests1,error,data
-    get_username_password()
+    global requests1,data
+    print(localtime_info()+"请输入账号和密码")
+    username = input("账号:")
+    password = getpass.getpass("密码:")
     print(localtime_info()+"正在登录中......")
     try:
-        requests1 = requests.post(url=login,json=data,headers=headers)
+        requests1 = requests.post(url=login,json={"username":username,"password":password},headers=headers)
         post1 = json.loads(requests1.text)
     except:
         print(localtime_error()+"登录失败,请检查 config.ini 文件")
+        print(localtime_error()+"运行错误！正在退出！！")
         exit()
-    if post1["data"] == "Succeeded": print(localtime_info()+"登录成功")
     else:
-        print(localtime_error()+"登录失败,请检查 config.ini 文件")
-        exit()
+        if post1["data"] == "Succeeded": print(localtime_info()+"登录成功")
+        else:
+            print(localtime_error()+"登录失败,请检查 config.ini 文件")
+            print(localtime_error()+"运行错误！正在退出！！")
+            exit()
 
 #检查 cookies
 def check_cookies():
@@ -157,7 +144,7 @@ def check_cookies():
 
 #获取 cookies
 def get_cookies():
-    global config,cookie,dir
+    global config,cookie,cmddir,requests1
     post_login()
     cookies = requests.utils.dict_from_cookiejar(requests1.cookies)
     csrftoken = cookies["csrftoken"]
@@ -165,7 +152,7 @@ def get_cookies():
     cookie = "csrftoken="+csrftoken+";sessionid="+sessionid
     #写入cookie到文件
     config.set("config","cookies",cookie)
-    with open(dir,"w",encoding="utf-8") as cookies:
+    with open(cmddir,"w",encoding="utf-8") as cookies:
         config.write(cookies)
         print(localtime_info()+"获取 cookie 成功!")
 
@@ -290,7 +277,9 @@ def problem_list():
             page = 1
             menu()
         elif into == "help": print(localtime_info()+"\n进入问题请输入题号\nmenu     返回菜单\npage:     页码跳转指定页码\ncls     清屏\nexit     退出")
-        elif into == "exit": exit()
+        elif into == "exit": 
+            print(localtime_error()+"运行错误！正在退出！！")
+            exit()
         elif into == "cls": os.system("cls")
         elif len(into) > 5 and into[:5] == "page:" and into[5:].isdigit() and int(into[5:]) > 0 and int(into[5:]) <= total:
             page = int(into[5:])
@@ -332,7 +321,9 @@ def problem_info():
             page = 1
             menu()
         if into == "help": print(localtime_info()+"\npost     提交\nback     返回问题列表\nmenu     返回菜单\ncls     清屏\nexit     退出")
-        elif into == "exit": exit()
+        elif into == "exit": 
+            print(localtime_error()+"运行错误！正在退出！！")
+            exit()
         elif into == "back": problem_list()
         elif into == "post": post_problem()
         elif into == "cls": os.system("cls")
@@ -412,7 +403,9 @@ def submission(submission_id):
             if into == "menu":
                 page = 1
                 menu()
-            elif into == "exit": exit()
+            elif into == "exit": 
+                print(localtime_error()+"运行错误！正在退出！！")
+                exit()
             elif into == "help":print(localtime_info()+"change     切换分享状态\nproblem_info 返回问题详细\nproblem_list  返回问题列表\nmenu     返回菜单\ncls       清屏\nexit     退出")
             elif into == "cls": os.system("cls")
             elif into == "change":
