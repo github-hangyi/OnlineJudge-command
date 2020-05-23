@@ -246,10 +246,10 @@ page = 1
 def problem_list():
     global get5,limit,page,problem_id
     print("\033[0;30m++++++++++++++++++++++++++++++\033[1;34m[problem list]\033[0m")
-    offset = (page - 1) *20
+    offset = (page - 1)*20
     requests5 = requests.get(url=gt_problem+"&offset="+str(offset)+"&limit="+str(limit),headers=headers1)
     get5 = json.loads(requests5.text)
-    problem_list = prettytable.PrettyTable(["状态","题号","题目","难度","总数","通过率"])
+    problem_detail = prettytable.PrettyTable(["状态","题号","题目","难度","总数","通过率"])
     total = get5["data"]["total"]
     if limit > total: limit = total
     if total % 20 > 0: total = total // 20 + 1
@@ -265,8 +265,8 @@ def problem_list():
         accepted_number = get5["data"]["results"][n1]["accepted_number"]
         if submission_number == 0: acv = "0%"
         else: acv = str(int(accepted_number)/int(submission_number)*100)[:5]+"%"
-        problem_list.add_row([color(my_status),_id,title,color(difficulty),submission_number,acv])
-    print(problem_list)
+        problem_detail.add_row([color(my_status),_id,title,color(difficulty),submission_number,acv])
+    print(problem_detail)
     print("                              第{}页 共{}页".format(page,total))
     print(localtime_info()+"进入问题请输入题号,返回菜单(menu),跳转指定页码(page:页码),退出(exit)")
     while True:
