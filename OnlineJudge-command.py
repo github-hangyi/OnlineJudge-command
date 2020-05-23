@@ -292,24 +292,24 @@ def problem_list():
 
 def problem_info():
     global get5,page,problem_id
-    print("\033[0;30m++++++++++++++++++++++++++++++\033[1;34m[problem info]\033[0m")
-    print("\033[1;34m题目:\033[0m\n"+get5["data"]["results"][problem_id]["title"])
-    print("\033[1;34m描述:\033[0m\n"+get5["data"]["results"][problem_id]["description"][3:-4])
+    print("\033[0;31m++++++++++++++++++++++++++++++\033[1;34m[problem info]\033[0m")
+    print("\033[1;34;47m题目:\033[0m\n"+get5["data"]["results"][problem_id]["title"])
+    print("\033[1;34;47m描述:\033[0m\n"+get5["data"]["results"][problem_id]["description"][3:-4])
     
-    print("\033[1;34m输入:\033[0m\n"+get5["data"]["results"][problem_id]["input_description"][3:-4])
-    print("\033[1;34m输出:\033[0m\n"+get5["data"]["results"][problem_id]["output_description"][3:-4])
+    print("\033[1;34;47m输入:\033[0m\n"+get5["data"]["results"][problem_id]["input_description"][3:-4])
+    print("\033[1;34;47m输出:\033[0m\n"+get5["data"]["results"][problem_id]["output_description"][3:-4])
     samples_id = 0
     while True:
         try:
             samples_input = get5["data"]["results"][problem_id]["samples"][samples_id]["input"]
             samples_output = get5["data"]["results"][problem_id]["samples"][samples_id]["output"]
-            print("\033[1;34m输入样例{}:\033[0m\n{}".format(samples_id + 1,samples_input))
-            print("\033[1;34m输出样例{}:\033[0m\n{}".format(samples_id + 1,samples_output))
+            print("\033[1;34;47m输入样例{}:\033[0m\n{}".format(samples_id + 1,samples_input))
+            print("\033[1;34;47m输出样例{}:\033[0m\n{}".format(samples_id + 1,samples_output))
             samples_id += 1
         except: break
-    print("\033[1;34m提示:\033[0m\n"+get5["data"]["results"][problem_id]["hint"][3:-4])
-    print("\033[1;34m来源:\033[0m"+get5["data"]["results"][problem_id]["source"])
-    print("\033[1;34m统计:\033[0m",end="")
+    print("\033[1;34;47m提示:\033[0m\n"+get5["data"]["results"][problem_id]["hint"][3:-4])
+    print("\033[1;34;47m来源:\033[0m"+get5["data"]["results"][problem_id]["source"])
+    print("\033[1;34;47m统计:\033[0m",end="")
     for x1 in range(-2,8):
         try: print(color(x1)+":",get5["data"]["results"][problem_id]["statistic_info"][str(x1)]+" ",end="")
         except: continue
