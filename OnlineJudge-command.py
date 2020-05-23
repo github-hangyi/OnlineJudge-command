@@ -1,4 +1,3 @@
-'''By hangyi'''
 # -*- coding:utf-8 -*-
 #导入库
 import requests,json,os,time,getpass,prettytable,colorama,configparser
@@ -8,7 +7,7 @@ colorama.init()
 def localtime_info():
     localtime = "\033[0;33m["+time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+"]\033[1;34m[info]\033[0m"
     return localtime
-'''By hangyi'''
+
 def localtime_error():
     localtime = "\033[0;33m["+time.strftime("%Y-%m-%d %H:%M:%S", time.localtime())+"]\033[1;31m[error]\033[0m"
     return localtime
@@ -194,7 +193,7 @@ def get_info():
         print(localtime_info()+"头像地址:",get2["data"]["avatar"])
         print(localtime_info()+"博客:",get2["data"]["blog"])
         print(localtime_info()+"心情:",get2["data"]["mood"])
-        '''By hangyi'''
+        
         print(localtime_info()+"github:",get2["data"]["github"])
         print(localtime_info()+"学校:",get2["data"]["school"])
         print(localtime_info()+"major:",get2["data"]["major"])
@@ -285,7 +284,7 @@ def problem_list():
     print(localtime_info()+"进入问题请输入题号,返回菜单(menu),跳转指定页码(page:页码),退出(exit)")
     while True:
         print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m",end="")
-        '''By hangyi'''
+        
         into = input(">")
         if into == "menu":
             page = 1
@@ -307,7 +306,7 @@ def problem_info():
     print("\033[0;30m++++++++++++++++++++++++++++++\033[1;34m[problem info]\033[0m")
     print("\033[1;34m题目:\033[0m\n"+get5["data"]["results"][problem_id]["title"])
     print("\033[1;34m描述:\033[0m\n"+get5["data"]["results"][problem_id]["description"][3:-4])
-    '''By hangyi'''
+    
     print("\033[1;34m输入:\033[0m\n"+get5["data"]["results"][problem_id]["input_description"][3:-4])
     print("\033[1;34m输出:\033[0m\n"+get5["data"]["results"][problem_id]["output_description"][3:-4])
     samples_id = 0
@@ -386,7 +385,7 @@ def submission(submission_id):
             print(localtime_error()+"错误信息:",get7["data"]["statistic_info"]["err_info"])
         else:
             print(localtime_info()+"时间:{}ms   内存:{}MB   语言:{}   提交者:{}".format(get7["data"]["statistic_info"]["time_cost"],get7["data"]["statistic_info"]["memory_cost"]//1048576,get7["data"]["language"],get7["data"]["username"]))
-            '''By hangyi'''
+            
             print(localtime_info()+"各个评测点状态:")
             submission_list = prettytable.PrettyTable(["ID","状态","内存","CPU用时","真实时间","分数","返回值"])
             id = 0
@@ -404,7 +403,7 @@ def submission(submission_id):
             print(submission_list)
         print("提交id:",get7["data"]["id"])
         print("提交时间:",get7["data"]["create_time"][:10],get7["data"]["create_time"][11:19])
-        '''By hangyi'''
+        
         print("代码:\n"+get7["data"]["code"])
         print("分享状态:",get7["data"]["shared"])
         while True:
@@ -444,12 +443,12 @@ def color(color):
     elif color == "Mid": color = "\033[1;44m 中 \033[0m"
     elif color == "Low": color = "\033[1;42m 低 \033[0m"
     else : color = "-"
-    '''By hangyi'''
+    
     return color
 
 if __name__ == '__main__':
     print(localtime_info()+"有错误一般都是 cookie 错误,尝试重新获取 cookies 一般都可解决")
-    '''By hangyi'''
+    
     #检查 cookie文件是否存在
     check_cookies()
     #主菜单
