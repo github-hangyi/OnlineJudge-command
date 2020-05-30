@@ -1,6 +1,6 @@
 # -*- coding:utf-8 -*-
 #导入库
-import requests,json,os,time,getpass,prettytable,colorama,configparser
+import requests,json,sys,os,time,getpass,prettytable,colorama,configparser
 colorama.init()
 
 #获取时间
@@ -28,17 +28,17 @@ else:
     config.add_section("config")
     config["config"] = {"url":"","auto_signin":"0","cookies":""}
     with open(cmddir,"w",encoding="utf-8") as configfile: config.write(configfile)
-    print(localtime_info()+"创建成功")
+    print(localtime_info()+"创建成功!","文件位于:"+cmddir)
 
 if config["config"]["url"] != "" and config["config"]["auto_signin"] != "":
     url = config["config"]["url"]
     cookie = config["config"]["cookies"]
     auto_signin = config["config"]["auto_signin"]
 else:
-    print(localtime_error()+"!!!!!!请先配置 config.ini!!!!!!")
-    print(cmddir)
-    print(localtime_error()+"运行错误！正在退出！！")
-    exit()
+    print(localtime_error()+"!!!!!!请先配置 config.ini!!!!!!","文件位于:"+cmddir)
+    os.system("pause")
+    sys.exit()
+
 cookie = config["config"]["cookies"]
 #错误
 error = 0
@@ -61,8 +61,7 @@ def menu():
         print(localtime_info()+"自动签到模式已开启")
         post_sign()
         get_sign()
-        print(localtime_error()+"运行错误！正在退出！！")
-        exit()
+        sys.exit()
     else: print(localtime_info()+"自动签到模式已关闭")
     print(localtime_info()+"欢迎来到主菜单,请输入指令,查看帮助请输 help")
     while True:
@@ -94,8 +93,8 @@ def menu():
             problem_list()
         elif into == "cls": os.system("cls")
         elif into == "exit":
-            print(localtime_error()+"运行错误！正在退出！！")
-            exit()
+            print(localtime_info()+"正在退出！！")
+            sys.exit()
         else: print(localtime_error()+"输入无效,请重新输入")
 
 #登录
@@ -109,15 +108,15 @@ def post_login():
         requests1 = requests.post(url=login,json={"username":username,"password":password},headers=headers)
         post1 = json.loads(requests1.text)
     except:
-        print(localtime_error()+"登录失败,请检查 config.ini 文件")
-        print(localtime_error()+"运行错误！正在退出！！")
-        exit()
+        print(localtime_error()+"登录失败,请检查 config.ini 文件","文件位于:"+cmddir)
+        os.system("pause")
+        sys.exit()
     else:
         if post1["data"] == "Succeeded": print(localtime_info()+"登录成功")
         else:
-            print(localtime_error()+"登录失败,请检查 config.ini 文件")
-            print(localtime_error()+"运行错误！正在退出！！")
-            exit()
+            print(localtime_error()+"登录失败,请检查 config.ini 文件","文件位于:"+cmddir)
+            os.system("pause")
+            sys.exit()
 
 #检查 cookies
 def check_cookies():
@@ -180,7 +179,6 @@ def get_info():
         print(localtime_info()+"头像地址:",get2["data"]["avatar"])
         print(localtime_info()+"博客:",get2["data"]["blog"])
         print(localtime_info()+"心情:",get2["data"]["mood"])
-        
         print(localtime_info()+"github:",get2["data"]["github"])
         print(localtime_info()+"学校:",get2["data"]["school"])
         print(localtime_info()+"major:",get2["data"]["major"])
@@ -278,8 +276,8 @@ def problem_list():
             menu()
         elif into == "help": print(localtime_info()+"\n进入问题请输入题号\nmenu     返回菜单\npage:     页码跳转指定页码\ncls     清屏\nexit     退出")
         elif into == "exit": 
-            print(localtime_error()+"运行错误！正在退出！！")
-            exit()
+            print(localtime_info()+"正在退出！！")
+            sys.exit()
         elif into == "cls": os.system("cls")
         elif len(into) > 5 and into[:5] == "page:" and into[5:].isdigit() and int(into[5:]) > 0 and int(into[5:]) <= total:
             page = int(into[5:])
@@ -322,8 +320,8 @@ def problem_info():
             menu()
         if into == "help": print(localtime_info()+"\npost     提交\nback     返回问题列表\nmenu     返回菜单\ncls     清屏\nexit     退出")
         elif into == "exit": 
-            print(localtime_error()+"运行错误！正在退出！！")
-            exit()
+            print(localtime_info()+"正在退出！！")
+            sys.exit()
         elif into == "back": problem_list()
         elif into == "post": post_problem()
         elif into == "cls": os.system("cls")
@@ -394,7 +392,6 @@ def submission(submission_id):
             print(submission_list)
         print("提交id:",get7["data"]["id"])
         print("提交时间:",get7["data"]["create_time"][:10],get7["data"]["create_time"][11:19])
-        
         print("代码:\n"+get7["data"]["code"])
         print("分享状态:",get7["data"]["shared"])
         while True:
@@ -404,8 +401,8 @@ def submission(submission_id):
                 page = 1
                 menu()
             elif into == "exit": 
-                print(localtime_error()+"运行错误！正在退出！！")
-                exit()
+                print(localtime_info()+"正在退出！！")
+                sys.exit()
             elif into == "help":print(localtime_info()+"change     切换分享状态\nproblem_info 返回问题详细\nproblem_list  返回问题列表\nmenu     返回菜单\ncls       清屏\nexit     退出")
             elif into == "cls": os.system("cls")
             elif into == "change":
@@ -436,12 +433,10 @@ def color(color):
     elif color == "Mid": color = "\033[1;44m 中 \033[0m"
     elif color == "Low": color = "\033[1;42m 低 \033[0m"
     else : color = "-"
-    
     return color
 
 if __name__ == '__main__':
     print(localtime_info()+"有错误一般都是 cookie 错误,尝试重新获取 cookies 一般都可解决")
-    
     #检查 cookie文件是否存在
     check_cookies()
     #主菜单
