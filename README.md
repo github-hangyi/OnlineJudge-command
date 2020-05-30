@@ -23,6 +23,7 @@ python OnlineJudge-command.py
 - [ ] 在线IDE
 - [ ] 查看关于信息
 - [ ] 设置基本信息
+- [ ] Log日志
 
 ## 使用教程
 * ### 配置文件介绍
