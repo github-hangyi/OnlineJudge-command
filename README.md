@@ -32,10 +32,6 @@ python OnlineJudge-command.py
   url = 
   #自动签到模式 = 1 为开，开启后无菜单界面，签到后自动退出
   auto_signin = 0
-  #用户名
-  username = 
-  #密码 
-  password = 
   #无需配置 
   cookies = 
 ```
