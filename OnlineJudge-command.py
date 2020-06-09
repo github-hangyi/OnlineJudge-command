@@ -1,7 +1,18 @@
 # -*- coding:utf-8 -*-
 #导入库
-import requests,json,sys,os,time,getpass,prettytable,colorama,configparser
+import requests,json,sys,logging,os,time,getpass,prettytable,colorama,configparser
 colorama.init()
+
+#log模块
+logger = logging.getLogger()
+logger.setLevel(logging.DEBUG)
+fh = logging.FileHandler("log.log",encoding="utf-8")
+ch = logging.StreamHandler()
+fh.setFormatter(logging.Formatter(fmt="[%(asctime)s] [%(title)s] [%(levelname)s] [%(message)s]"))
+ch.setFormatter(logging.Formatter(fmt="\033[0;33m[%(asctime)s] %(color)s[%(levelname)s]\033[0m [%(message)s]",datefmt="%X"))
+logger.addHandler(fh)
+logger.addHandler(ch)
+logger.error("",extra={'title':'','color':color(error)})
 
 #获取时间
 def localtime_info():
@@ -24,18 +35,18 @@ config.read(cmddir,encoding="utf-8")
 
 if config.has_option("config","url") and config.has_option("config","auto_signin") and config.has_option("config","cookies"):error = 0
 else:
-    print(localtime_error()+"config.ini 文件出错,正在重新创建......")
+    logger.error("config.ini 文件出错,正在重新创建......",extra={'title':'TITLE','color':color(error)})
     config.add_section("config")
     config["config"] = {"url":"","auto_signin":"0","cookies":""}
     with open(cmddir,"w",encoding="utf-8") as configfile: config.write(configfile)
-    print(localtime_info()+"创建成功!","文件位于:"+cmddir)
+    logger.info("创建成功! 文件位于: "+cmddir,extra={'title':'TITLE','color':color(info)})
 
 if config["config"]["url"] != "" and config["config"]["auto_signin"] != "":
     url = config["config"]["url"]
     cookie = config["config"]["cookies"]
     auto_signin = config["config"]["auto_signin"]
 else:
-    print(localtime_error()+"!!!!!!请先配置 config.ini!!!!!!","文件位于:"+cmddir)
+    logger.error("!!请先配置 config.ini!! 文件位于: "+cmddir,extra={'title':'TITLE','color':color(error)})
     os.system("pause")
     sys.exit()
 
@@ -57,13 +68,15 @@ announcement = url+"/api/announcement?offset=0&limit=10"
 #主菜单
 def menu():
     global error,get2,auto_signin
+    #检查 cookie文件是否存在
+    check_cookies()
     if auto_signin == "1":
-        print(localtime_info()+"自动签到模式已开启")
+        logger.info("自动签到模式已开启",extra={'title':'menu','color':color(info)})
         post_sign()
         get_sign()
         sys.exit()
-    else: print(localtime_info()+"自动签到模式已关闭")
-    print(localtime_info()+"欢迎来到主菜单,请输入指令,查看帮助请输 help")
+    else: logger.info("自动签到模式已关闭",extra={'title':'menu','color':color(info)})
+    logger.info("欢迎来到主菜单,请输入指令,查看帮助请输 help",extra={'title':'menu','color':color(info)})
     while True:
         print("\033[0;30m++++++++++++++++++++++++++++++++++\033[1;34m[menu]\033[0m")
         if error == 1: into = input("游客>")
@@ -93,28 +106,29 @@ def menu():
             problem_list()
         elif into == "cls": os.system("cls")
         elif into == "exit":
-            print(localtime_info()+"正在退出！！")
+            logger.info("正在退出！！",extra={'title':'menu','color':color(info)})
             sys.exit()
-        else: print(localtime_error()+"输入无效,请重新输入")
+        else: 
+        logger.error("输入无效,请重新输入",extra={'title':'menu','color':color(error)})
 
 #登录
 def post_login():
     global requests1,data
-    print(localtime_info()+"请输入账号和密码")
+    logger.info("请输入账号和密码",extra={'title':'post_login','color':color(info)})
     username = input("账号:")
     password = getpass.getpass("密码:")
-    print(localtime_info()+"正在登录中......")
+    logger.info("正在登录中......",extra={'title':'post_login','color':color(info)})
     try:
         requests1 = requests.post(url=login,json={"username":username,"password":password},headers=headers)
         post1 = json.loads(requests1.text)
     except:
-        print(localtime_error()+"登录失败,请检查 config.ini 文件","文件位于:"+cmddir)
+        logger.error("登录失败,请检查 config.ini 文件! 文件位于: "+cmddir,extra={'title':'post_login','color':color(error)})
         os.system("pause")
         sys.exit()
     else:
-        if post1["data"] == "Succeeded": print(localtime_info()+"登录成功")
+        if post1["data"] == "Succeeded": logger.info("登录成功",extra={'title':'post_login','color':color(info)})
         else:
-            print(localtime_error()+"登录失败,请检查 config.ini 文件","文件位于:"+cmddir)
+            logger.error("登录失败,请检查 config.ini 文件! 文件位于: "+cmddir,extra={'title':'post_login','color':color(error)})
             os.system("pause")
             sys.exit()
 
@@ -122,17 +136,16 @@ def post_login():
 def check_cookies():
     global headers1,get2,cookie
     if cookie == "":
-        print(localtime_error()+"未检测到 cookies 文件,尝试重新获取......")
+        logger.error("未检测到 cookies 文件,尝试重新获取......",extra={'title':'check_cookies','color':color(error)})
         get_cookies()
         check_cookies()
     else:
-        print(localtime_info()+"已检测到 cookies 文件,尝试直接登录......")
+        logger.info("已检测到 cookies 文件,尝试直接登录......",extra={'title':'check_cookies','color':color(info)})
         #头文件
         headers1 = {
             "Content-Type":"application/json;charset=utf-8",
             "Cookie":cookie,
-            "X-CSRFToken":cookie[10:74],
-            "Connection":"close"
+            "X-CSRFToken":cookie[10:74]
         }
         requests2 = requests.get(url=info,headers=headers1)
         get2 = json.loads(requests2.text)
@@ -153,42 +166,43 @@ def get_cookies():
     config.set("config","cookies",cookie)
     with open(cmddir,"w",encoding="utf-8") as cookies:
         config.write(cookies)
-        print(localtime_info()+"获取 cookie 成功!")
+        logger.info("获取 cookie 成功!",extra={'title':'get_cookies','color':color(info)})
 
 #获取用户信息
 def get_info():
     global error
-    print("\033[0;30m++++++++++++++++++++++++++++++++++\033[1;34m[info]\033[0m")
-    print(localtime_info()+"正在获取用户信息......")
+    logger.info("[info]",extra={'title':'get_info','color':color(info)})
+    logger.info("正在获取用户信息......",extra={'title':'get_info','color':color(info)})
     if get2["data"]:
-        print(localtime_info()+"获取成功!")
-        print(localtime_info()+"数据id:",get2["data"]["id"])
-        print(localtime_info()+"用户id:",get2["data"]["user"]["id"])
-        print(localtime_info()+"用户名:",get2["data"]["user"]["username"])
-        print(localtime_info()+"邮箱:",get2["data"]["user"]["email"])
-        print(localtime_info()+"用户组:",get2["data"]["user"]["admin_type"])
-        print(localtime_info()+"问题权限:",get2["data"]["user"]["problem_permission"])
-        print(localtime_info()+"注册时间:",get2["data"]["user"]["create_time"][:10],get2["data"]["user"]["create_time"][11:19])
-        print(localtime_info()+"最后登录时间:",get2["data"]["user"]["last_login"][:10],get2["data"]["user"]["last_login"][11:19])
-        print(localtime_info()+"两步验证:",get2["data"]["user"]["two_factor_auth"])
-        print(localtime_info()+"api是否开放:",get2["data"]["user"]["open_api"])
-        print(localtime_info()+"是否不可用:",get2["data"]["user"]["is_disabled"])
-        print(localtime_info()+"真实姓名:",get2["data"]["real_name"])
-        #print(localtime_info()+"ACM问题状态:",get2["data"]["acm_problems_status"])
-        #print(localtime_info()+"OI问题状态:",get2["data"]["oi_problems_status"])
-        print(localtime_info()+"头像地址:",get2["data"]["avatar"])
-        print(localtime_info()+"博客:",get2["data"]["blog"])
-        print(localtime_info()+"心情:",get2["data"]["mood"])
-        print(localtime_info()+"github:",get2["data"]["github"])
-        print(localtime_info()+"学校:",get2["data"]["school"])
-        print(localtime_info()+"major:",get2["data"]["major"])
-        print(localtime_info()+"语言:",get2["data"]["language"])
-        print(localtime_info()+"年级:",get2["data"]["grade"])
-        print(localtime_info()+"稳点:",get2["data"]["experience"])
-        print(localtime_info()+"当前等级:",get_level())
-        print(localtime_info()+"AC题数:",get2["data"]["accepted_number"])
-        print(localtime_info()+"总成绩:",get2["data"]["total_score"])
-        print(localtime_info()+"提交编号:",get2["data"]["submission_number"])
+        logger.info("",extra={'title':'get_info','color':color(info)})
+        logger.info("获取成功!",extra={'title':'get_info','color':color(info)})
+        logger.info("数据id:",get2["data"]["id"],extra={'title':'get_info','color':color(info)})
+        logger.info("用户id:",get2["data"]["user"]["id"],extra={'title':'get_info','color':color(info)})
+        logger.info("用户名:",get2["data"]["user"]["username"],extra={'title':'get_info','color':color(info)})
+        logger.info("邮箱:",get2["data"]["user"]["email"],extra={'title':'get_info','color':color(info)})
+        logger.info("用户组:",get2["data"]["user"]["admin_type"],extra={'title':'get_info','color':color(info)})
+        logger.info("问题权限:",get2["data"]["user"]["problem_permission"],extra={'title':'get_info','color':color(info)})
+        logger.info("注册时间:",get2["data"]["user"]["create_time"][:10],get2["data"]["user"]["create_time"][11:19],extra={'title':'get_info','color':color(info)})
+        logger.info("最后登录时间:",get2["data"]["user"]["last_login"][:10],get2["data"]["user"]["last_login"][11:19],extra={'title':'get_info','color':color(info)})
+        logger.info("两步验证:",get2["data"]["user"]["two_factor_auth"],extra={'title':'get_info','color':color(info)})
+        logger.info("api是否开放:",get2["data"]["user"]["open_api"],extra={'title':'get_info','color':color(info)})
+        logger.info("是否不可用:",get2["data"]["user"]["is_disabled"],extra={'title':'get_info','color':color(info)})
+        logger.info("真实姓名:",get2["data"]["real_name"],extra={'title':'get_info','color':color(info)})
+        #logger.info("ACM问题状态:",get2["data"]["acm_problems_status"],extra={'title':'get_info','color':color(info)})
+        #logger.info("OI问题状态:",get2["data"]["oi_problems_status"],extra={'title':'get_info','color':color(info)})
+        logger.info("头像地址:",get2["data"]["avatar"],extra={'title':'get_info','color':color(info)})
+        logger.info("博客:",get2["data"]["blog"],extra={'title':'get_info','color':color(info)})
+        logger.info("心情:",get2["data"]["mood"],extra={'title':'get_info','color':color(info)})
+        logger.info("github:",get2["data"]["github"],extra={'title':'get_info','color':color(info)})
+        logger.info("学校:",get2["data"]["school"],extra={'title':'get_info','color':color(info)})
+        logger.info("major:",get2["data"]["major"],extra={'title':'get_info','color':color(info)})
+        logger.info("语言:",get2["data"]["language"],extra={'title':'get_info','color':color(info)})
+        logger.info("年级:",get2["data"]["grade"],extra={'title':'get_info','color':color(info)})
+        logger.info("AC题数:",get2["data"]["accepted_number"],extra={'title':'get_info','color':color(info)})
+        logger.info("总成绩:",get2["data"]["total_score"],extra={'title':'get_info','color':color(info)})
+        logger.info("提交编号:",get2["data"]["submission_number"],extra={'title':'get_info','color':color(info)})
+        logger.info("稳点:",get2["data"]["experience"],extra={'title':'get_info','color':color(info)})
+        logger.info("当前等级:",get_level(),extra={'title':'get_info','color':color(info)})
     else:
         get_cookies()
         check_cookies()
@@ -286,7 +300,7 @@ def problem_list():
         else:
             problem_id = titlelist.get(into,"None")
             if problem_id != "None": problem_info()
-            else: print(localtime_error()+"输入错误,请重新输入")
+            else: logger.error("输入错误,请重新输入",extra={'title':'problem_list','color':color(error)})
 
 def problem_info():
     global get5,page,problem_id
@@ -325,7 +339,7 @@ def problem_info():
         elif into == "back": problem_list()
         elif into == "post": post_problem()
         elif into == "cls": os.system("cls")
-        else:print(localtime_error()+"输入错误,请重新输入")
+        else: logger.error("输入错误,请重新输入",extra={'title':'problem_list','color':color(error)})
 
 def post_problem():
     global get5,problem_id
@@ -348,7 +362,7 @@ def post_problem():
             if b == "N": problem_info()
             else: codes = code.read()
     except:
-        print(localtime_error()+"未找到 code,正在创建......")
+        logger.error("未找到 code,正在创建......",extra={'title':'post_problem','color':color(error)})
         with open("code", mode="w",encoding="utf-8"): print(localtime_info()+"创建成功!")
         post_problem()
     data1 = {"problem_id":id,"language":language,"code":codes}
@@ -371,7 +385,9 @@ def submission(submission_id):
         print("提交状态:",color(get7["data"]["result"]))
         if get7["data"]["result"] == -2 or get7["data"]["result"] == 5:
             print(get7["data"]["result"])
-            print(localtime_error()+"错误信息:",get7["data"]["statistic_info"]["err_info"])
+            logger.info(get7["data"]["result"],extra={'title':'submission','color':color(info)})
+            logger.error("错误信息:"+get7["data"]["statistic_info"]["err_info"],extra={'title':'submission','color':color(error)})
+            
         else:
             print(localtime_info()+"时间:{}ms   内存:{}MB   语言:{}   提交者:{}".format(get7["data"]["statistic_info"]["time_cost"],get7["data"]["statistic_info"]["memory_cost"]//1048576,get7["data"]["language"],get7["data"]["username"]))
             
@@ -414,11 +430,14 @@ def submission(submission_id):
                 print(localtime_info()+"当前分享状态:",get7["data"]["shared"])
             elif into == "problem_info": problem_info()
             elif into == "problem_list": problem_list()
-            else:print(localtime_error()+"输入错误,请重新输入")
+            else: logger.error("输入错误,请重新输入",extra={'title':'submission','color':color(error)})
 
 def color(color):
+    #####log日志#####
+    if color == "info": color = '\033[1;34m'
+    elif color == "error": color = '\033[1;31m'
     #####提交状态#####
-    if color == -2 or color == "CE": color = "\033[1;35mCompile Error\033[0m"
+    elif color == -2 or color == "CE": color = "\033[1;35mCompile Error\033[0m"
     elif color == -1 or color == "WA": color = "\033[1;31mWrong Answer\033[0m"
     elif color == 0 or color == "AC": color = "\033[1;32mAccepted\033[0m"
     elif color == 1 or color == 2 or color == "TLE": color = "\033[1;31mTime Limit Exceeded\033[0m"
@@ -437,7 +456,5 @@ def color(color):
 
 if __name__ == '__main__':
     print(localtime_info()+"有错误一般都是 cookie 错误,尝试重新获取 cookies 一般都可解决")
-    #检查 cookie文件是否存在
-    check_cookies()
     #主菜单
     menu()
