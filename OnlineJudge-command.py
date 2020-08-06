@@ -506,10 +506,6 @@ def submission(submission_id):
                 requests8 = requests.put(url=tj_problem, data=data2, headers=headers1)
                 requests7 = requests.get(url=tj_problem+submission_id, headers=headers1)
                 get7 = json.loads(requests7.text)
-                print(get7)
-                print(requests8)
-                print(requests8.text)
-                print(json.loads(requests8.text))
                 log("info", title, "当前分享状态: " + str(get7["data"]["shared"]))
             elif into == "problem_info":
                 problem_info()
