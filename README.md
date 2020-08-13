@@ -31,12 +31,12 @@ python3 OnlineJudge-command.py
 ```
 [Config]
 #网站地址
-url = https://www.example.com
+url = https://oj.yangzheng.com.cn
 #自动签到模式 = True为开，开启后无菜单界面，签到后自动退出
 auto_signin = False
 ```
 - ##  [主菜单]
-```console
+```
 $help
 帮助中心:
 cookie    重新获取 cookie
@@ -47,7 +47,7 @@ clear     清屏
 exit      退出
 ```
 - ## [题目列表]
-```console
+```
 $help
 进入问题请输入题号
 menu     返回菜单
@@ -56,7 +56,7 @@ clear    清屏
 exit     退出
   ```
 - ## [题目详细]
-```console
+```
 $help
 post     提交
 back     返回问题列表
@@ -65,7 +65,7 @@ clear    清屏
 exit     退出
 ```
 - ## [提交结果]
-```console
+```
 $help
 change        切换分享状态
 problem_info  返回问题详细
