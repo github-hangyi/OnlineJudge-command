@@ -1,7 +1,7 @@
 #!usr/bin/python3
 # -*- coding: utf-8 -*-
 #导入库
-import requests, json, sys, logging, os, getpass, prettytable, colorama, configparser
+import requests, json, logging, os, getpass, prettytable, colorama, configparser, base64
 colorama.init()
 
 def color(color):
@@ -44,28 +44,30 @@ headers = {"Content-Type": "application/json;charset=utf-8",
     "Connection": "close"
     }
 
-cmddir = os.getcwd()+"\\config.ini"
+log("error", "info", "当前路径:" + os.path.abspath(__file__)[:len(os.getcwd())+1])
+cmddir = os.path.abspath(__file__)[:len(os.getcwd())+1] + "config.ini"
 config = configparser.RawConfigParser()
 config.read(cmddir, encoding="utf-8")
 
-if config.has_option("config", "url") and config.has_option("config", "auto_signin") and config.has_option("config", "cookies"): error = 0
+if config.has_option("config", "url") and config.has_option("config", "auto_signin"): 
+    if config["config"]["url"] != "" and config["config"]["auto_signin"] != "":
+        url = config["config"]["url"]
+        auto_signin = config["config"]["auto_signin"]
+    else:
+        log("error", "配置", "config.ini 文件出错, 请检查 config.ini 文件! 文件位于: " + cmddir)
+        exit()
 else:
     log("error", "配置", "config.ini 文件出错, 正在重新创建......")
     config.add_section("config")
-    config["config"] = {"url": "", "auto_signin": "0", "cookies": ""}
-    with open(cmddir, "w", encoding="utf-8") as configfile : config.write(configfile)
+    config["config"] = {
+      "url": "", 
+      "auto_signin": "0", 
+      }
+    with open(cmddir, "w", encoding="utf-8") as configfile: 
+        config.write(configfile)
     log("info", "配置", "创建成功! 文件位于: " + cmddir)
+    exit()
 
-if config["config"]["url"] != "" and config["config"]["auto_signin"] != "":
-    url = config["config"]["url"]
-    cookie = config["config"]["cookies"]
-    auto_signin = config["config"]["auto_signin"]
-else:
-    log("error", '配置', "请先配置 config.ini!! 文件位于: " + cmddir)
-    os.system("pause")
-    sys.exit()
-
-cookie = config["config"]["cookies"]
 #错误
 error = 0
 #登录地址
@@ -87,11 +89,11 @@ def menu():
     log("info", title, "有错误一般都是 cookie 错误, 尝试重新获取 cookies 一般都可解决")
     #检查 cookie文件是否存在
     check_cookies()
-    if auto_signin == "1":
+    if auto_signin == "True":
         log("info", title, "自动签到模式已开启")
         post_sign()
         get_sign()
-        sys.exit()
+        exit()
     else:
         log("info", title, "自动签到模式已关闭")
     log("info", title, "欢迎来到主菜单, 帮助中心: ")
@@ -100,7 +102,7 @@ def menu():
     log("info", title, "problem    题目列表")
     log("info", title, "signin     签到")
     log("info", title, "exit       退出")
-    log("info", title, "cls        清屏")
+    log("info", title, "clear      清屏")
     while True :
         print("\033[0;30m++++++++++++++++++++++++++++++++++\033[1;34m[菜单]\033[0m")
         if error == 1 :
@@ -115,49 +117,65 @@ def menu():
             log("info", title, "problem    题目列表")
             log("info", title, "signin     签到")
             log("info", title, "exit       退出")
-            log("info", title, "cls        清屏")
+            log("info", title, "clear      清屏")
         elif into == "cookie":
             get_cookies()
             check_cookies()
         elif into == "info":
-            os.system("cls")
             get_info()
         elif into == "signin":
-            os.system("cls")
             post_sign()
             get_sign()
         elif into == "problem":
-            os.system("cls")
             problem_list()
-        elif into == "cls": os.system("cls")
+        elif into == "clear": 
+            os.system("clear")
         elif into == "exit":
             log("error", title, "正在退出!!")
-            sys.exit()
+            exit()
         else: log("error", title, "输入无效, 请重新输入")
 
 #登录
 def post_login():
-    global requests1, data, cmddir
+    global requests1, data, cmddir, config, error
     title = "登录"
-    log("info", title, "请输入账号和密码")
-    username = input("账号: ")
-    password = getpass.getpass("密码: ")
+    if config.has_option("config", "username") and config.has_option("config", "password") and config["config"]["username"] != "" and config["config"]["password"] != "" and error == 0:
+        username = config["config"]["username"]
+        password = config["config"]["password"]
+        try:
+            for number in range(1, 10):
+                password = base64.b64decode(password).decode("utf-8")
+        except:
+            log("error", title, "密码解密失败")
+            error = 1
+            post_login()
+    else:
+        log("info", title, "请输入账号和密码")
+        username = input("账号: ")
+        password = getpass.getpass("密码: ")
     log("info", title, "正在登录中......")
     try:
         requests1 = requests.post(url=login, json={"username": username, "password": password}, headers=headers)
         post1 = json.loads(requests1.text)
     except:
         log("error", title, "登录失败, 请检查 config.ini 文件! 文件位于: " + cmddir)
-        log("error", title, "错误信息:")
-        log("error", title, requests1.text)
-        post_login()
+        exit()
     else:
         if post1["data"] == "Succeeded":
             log("info", title, "登录成功")
+            error = 0
+            config.set("config", "username", username)
+            for number in range(1, 10):
+                password = base64.b64encode(password.encode("utf-8")).decode("utf-8")
+            config.set("config", "password", password)
+            with open(cmddir, "w", encoding="utf-8") as cookies :
+                config.write(cookies)
+                log("info", "登录", "保存账号和密码成功!")
         else:
             log("error", title, "登录失败, 请检查 config.ini 文件! 文件位于: " + cmddir)
             log("error", title, post1["error"])
             log("error", title, post1["data"])
+            error = 1
             post_login()
 
 #获取 cookies
@@ -176,13 +194,10 @@ def get_cookies():
 
 #检查 cookies
 def check_cookies():
-    global headers1, get2, cookie, userinfo
-    if cookie == "":
-        log("error", "登录", "未检测到 cookies 文件, 尝试重新获取......")
-        get_cookies()
-        check_cookies()
-    else:
+    global headers1, get2, config, userinfo
+    if config.has_option("config", "cookies") and config["config"]["cookies"] != "":
         log("info", "登录", "已检测到 cookies 文件, 尝试直接登录......")
+        cookie = config["config"]["cookies"]
         #头文件
         headers1 = {
             "Content-Type": "application/json;charset=utf-8",
@@ -196,10 +211,14 @@ def check_cookies():
         except :
             get_cookies()
             check_cookies()
+    else:
+        log("error", "登录", "未检测到 cookies 文件, 尝试获取......")
+        get_cookies()
+        check_cookies()
 
 #获取用户信息
 def get_info():
-    global error,get2
+    global error,get2, url
     title = "用户信息"
     log("info", title, "正在获取用户信息......")
     if get2["data"] :
@@ -216,9 +235,9 @@ def get_info():
         log("info", title, "api是否开放: " + str(get2["data"]["user"]["open_api"]))
         log("info", title, "是否被禁用: " + str(get2["data"]["user"]["is_disabled"]))
         log("info", title, "真实姓名: " + str(get2["data"]["real_name"]))
-        log("info", title, "ACM问题状态: " + str(get2["data"]["acm_problems_status"]))
-        log("info", title, "OI问题状态: " + str(get2["data"]["oi_problems_status"]))
-        log("info", title, "头像地址: " + str(get2["data"]["avatar"]))
+        #log("info", title, "ACM问题状态: " + str(get2["data"]["acm_problems_status"]))
+        #log("info", title, "OI问题状态: " + str(get2["data"]["oi_problems_status"]))
+        log("info", title, "头像地址: " + url + str(get2["data"]["avatar"]))
         log("info", title, "博客: " + str(get2["data"]["blog"]))
         log("info", title, "心情: " + str(get2["data"]["mood"]))
         log("info", title, "github地址: " + str(get2["data"]["github"]))
@@ -319,7 +338,7 @@ def problem_list():
     log("info", title, "进入问题请输入题号")
     log("info", title, "menu         返回菜单")
     log("info", title, "page:页码     跳转指定页码")
-    log("info", title, "cls          清屏")
+    log("info", title, "clear          清屏")
     log("info", title, "exit         退出")
     while True :
         print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m", end="")
@@ -331,16 +350,16 @@ def problem_list():
             log("info", title, "进入问题请输入题号")
             log("info", title, "menu         返回菜单")
             log("info", title, "page:页码     跳转指定页码")
-            log("info", title, "cls          清屏")
+            log("info", title, "clear          清屏")
             log("info", title, "exit         退出")
         elif into == "exit":
             log("error", title, "正在退出!!")
-            sys.exit()
-        elif into == "cls":
-            os.system("cls")
+            exit()
+        elif into == "clear":
+            os.system("clear")
         elif len(into) > 5 and into[:5] == "page:" and into[5:].isdigit() and int(into[5:]) > 0 and int(into[5:]) <= total:
             page = int(into[5 : ])
-            os.system("cls")
+            os.system("clear")
             problem_list()
         else:
             problem_id = titlelist.get(into, "None")
@@ -374,7 +393,7 @@ def problem_info():
     log("info", title, "post     提交")
     log("info", title, "back     返回问题列表")
     log("info", title, "menu     返回菜单")
-    log("info", title, "cls      清屏")
+    log("info", title, "clear      清屏")
     log("info", title, "exit     退出")
     while True :
         print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m", end="")
@@ -386,17 +405,17 @@ def problem_info():
             log("info", title, "post     提交")
             log("info", title, "back     返回问题列表")
             log("info", title, "menu     返回菜单")
-            log("info", title, "cls      清屏")
+            log("info", title, "clear      清屏")
             log("info", title, "exit     退出")
         elif into == "exit":
             log("error", title, "正在退出!!")
-            sys.exit()
+            exit()
         elif into == "back":
             problem_list()
         elif into == "post":
             post_problem()
-        elif into == "cls":
-            os.system("cls")
+        elif into == "clear":
+            os.system("clear")
         else:
             title = "题目详细"
             log("error", title, "输入错误, 请重新输入")
@@ -478,7 +497,7 @@ def submission(submission_id):
         log("info", title, "problem_info   返回问题详细")
         log("info", title, "problem_list   返回问题列表")
         log("info", title, "menu           返回菜单")
-        log("info", title, "cls            清屏")
+        log("info", title, "clear            清屏")
         log("info", title, "exit           退出")
         while True :
             print("\033[1;36m["+get2["data"]["user"]["username"]+"]\033[0m", end="")
@@ -488,16 +507,16 @@ def submission(submission_id):
                 menu()
             elif into == "exit":
                 log("error", title, "正在退出!!")
-                sys.exit()
+                exit()
             elif into == "help":
                 log("info", title, "change         切换分享状态")
                 log("info", title, "problem_info   返回问题详细")
                 log("info", title, "problem_list   返回问题列表")
                 log("info", title, "menu           返回菜单")
-                log("info", title, "cls            清屏")
+                log("info", title, "clear            清屏")
                 log("info", title, "exit           退出")
-            elif into == "cls":
-                os.system("cls")
+            elif into == "clear":
+                os.system("clear")
             elif into == "change":
                 if get7["data"]["shared"]: 
                     data2 = {"id": submission_id, "shared": False}
