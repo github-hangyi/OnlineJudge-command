@@ -2,7 +2,7 @@
 
 ## 功能
 - [x] 登录
-- [x] 签到
+- [x] 自动签到
 - [x] 获取基本信息
 - [x] 做题(部分题目显示有问题）
 - [x] Log日志
@@ -20,24 +20,26 @@
 1. 下载此代码
 2. 首次使用请自行安装 Python3 和 pip 并执行以下命令
 ```
-pip3 install --upgrade pip3
-pip3 install -r requirements.txt
+python -m pip install --upgrade pip -i https://pypi.tuna.tsinghua.edu.cn/simple
+pip install -r requirements.txt -i https://pypi.tuna.tsinghua.edu.cn/simple
 ```
 3. 运行
 ```
-python3 OnlineJudge-command.py
+python OnlineJudge-command.py
 ```
 - ### 配置文件介绍
-```
-[Config]
-#网站地址
-url = https://oj.yangzheng.com.cn
-#自动签到模式 = True为开，开启后无菜单界面，签到后自动退出
-auto_signin = False
-```
+
+|        项目         |             介绍              |
+| :-----------------: | :---------------------------: |
+|        url =        |        必填，OJ 的地址        |
+| auto_signin = False | 必填，自动签到模式 True/False |
+
+## 帮助
+
+输入`help`查看帮助
 - ##  [主菜单]
 ```
-$help
+>help
 帮助中心:
 cookie    重新获取 cookie
 info      获取基本信息
@@ -48,7 +50,7 @@ exit      退出
 ```
 - ## [题目列表]
 ```
-$help
+>help
 进入问题请输入题号
 menu     返回菜单
 page:    页码跳转指定页码
@@ -57,7 +59,7 @@ exit     退出
   ```
 - ## [题目详细]
 ```
-$help
+>help
 post     提交
 back     返回问题列表
 menu     返回菜单
@@ -66,11 +68,11 @@ exit     退出
 ```
 - ## [提交结果]
 ```
-$help
+>help
 change        切换分享状态
 problem_info  返回问题详细
 problem_list  返回问题列表
 menu          返回菜单
 clear         清屏
-exit          退出 
+exit          退出
 ```
