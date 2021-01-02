@@ -21,13 +21,11 @@ printlog.setFormatter(logging.Formatter(fmt="\033[0;33m[%(asctime)s]%(level)s\03
 printlogger = logging.getLogger()
 printlogger.addHandler(printlog)
 
-
 def log(level, message):
     if level == "info":
         logging.info(message, extra={"level": '\033[1;34m[信息]'})
     if level == "error":
         logging.error(message, extra={"level": '\033[1;31m[错误]'})
-
 
 # 配置文件
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
