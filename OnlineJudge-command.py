@@ -89,18 +89,9 @@ def menu():
         log("info", "problem    题目列表")
         log("info", "signin     签到")
         log("info", "exit       退出")
-        log("info", "clear      清屏")
         print("\033[1;36m[" + info["data"]["user"]["username"] + "]\033[0m", end="")
         into = input("> ")
-        if into == "help":
-            log("info", "帮助中心: ")
-            log("info", "cookie     重新获取 cookie")
-            log("info", "info       获取基本信息")
-            log("info", "problem    题目列表")
-            log("info", "signin     签到")
-            log("info", "exit       退出")
-            log("info", "clear      清屏")
-        elif into == "cookie":
+        if into == "cookie":
             log("info", "请输入账号和密码")
             username = input("账号: ")
             password = getpass.getpass("密码: ")
@@ -112,8 +103,6 @@ def menu():
             signin()
         elif into == "problem":
             problem_list(1, "")
-        elif into == "clear":
-            os.system("clear")
         elif into == "exit":
             log("info", "正在退出!")
             return
