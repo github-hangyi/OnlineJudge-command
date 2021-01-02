@@ -1,4 +1,4 @@
-configparser
-requests
-prettytable
 colorama
+configparser
+prettytable
+requests
