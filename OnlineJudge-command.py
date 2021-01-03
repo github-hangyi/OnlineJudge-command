@@ -1,4 +1,4 @@
-# /usr/bin/env python3
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 # 导入库
 import configparser
@@ -21,12 +21,15 @@ printlog.setFormatter(logging.Formatter(fmt="\033[0;33m[%(asctime)s]%(level)s\03
 printlogger = logging.getLogger()
 printlogger.addHandler(printlog)
 
+
 def log(level, message):
     if level == "info":
         logging.info(message, extra={"level": '\033[1;34m[信息]'})
     if level == "error":
         logging.error(message, extra={"level": '\033[1;31m[错误]'})
 
+
+cls = re.compile(r'<[^>]+>', re.S)
 # 配置文件
 os.chdir(os.path.dirname(os.path.abspath(__file__)))
 config = configparser.RawConfigParser()
@@ -44,7 +47,7 @@ sighin = url + "/api/sighin"
 gt_problem = url + "/api/problem"
 tj_problem = url + "/api/submission"
 # 获取公告地址
-announcement = url + "/api/announcement?offset=0&limit=10"
+notice = url + "/api/announcement?offset=0&limit=10"
 # 方糖推送地址
 ftqq = "https://sc.ftqq.com/" + config["config"]["ftqq"] + ".send?text="
 # 请求头文件
@@ -83,9 +86,10 @@ def menu():
         print("\033[0;30m                \033[1;34m[菜单]\033[0m")
         log("info", "欢迎来到主菜单, 帮助中心: ")
         log("info", "cookie     重新获取 cookie")
-        log("info", "info       获取基本信息")
-        log("info", "problem    题目列表")
+        log("info", "info       用户信息")
         log("info", "signin     签到")
+        log("info", "notice     公告")
+        log("info", "problem    题目列表")
         log("info", "exit       退出")
         print("\033[1;36m[" + info["data"]["user"]["username"] + "]\033[0m", end="")
         into = input("> ")
@@ -99,49 +103,15 @@ def menu():
             get_info()
         elif into == "signin":
             signin()
+        elif into == "notice":
+            announcement()
         elif into == "problem":
-            problem_list(1, "")
+            problem_list()
         elif into == "exit":
             log("info", "正在退出!")
             return
         else:
             log("error", "输入无效, 请重新输入")
-
-
-# 登录
-def post_login(username, password):
-    #for _ in range(1, 10):
-    #    password = base64.b64decode(password).decode("utf-8")
-    log("info", "正在登录中......")
-    headers["Cookie"] = "csrftoken=gnW1iou7O0fvueeGyENEEfDV4mPdob6BnISwCxMx3Li6pXpsmner56kwGn18denc"
-    headers["X-CSRFToken"] = "gnW1iou7O0fvueeGyENEEfDV4mPdob6BnISwCxMx3Li6pXpsmner56kwGn18denc"
-    try:
-        response = requests.post(url=login, json={"username": username, "password": password}, headers=headers)
-        post = json.loads(response.text)
-    except:
-        log("error", "登录失败,请检查配置文件")
-        return "error"
-    else:
-        if post["data"] == "Succeeded":
-            log("info", "登录成功")
-            cookies = requests.utils.dict_from_cookiejar(response.cookies)
-            cookies = "csrftoken=" + cookies["csrftoken"] + ";sessionid=" + cookies["sessionid"]
-            headers["Cookie"] = cookies
-            headers["X-CSRFToken"] = cookies[10:74]
-            if config["config"]["auto_signin"] == "True":
-                account[i]["cookies"] = "csrftoken=" + cookies["csrftoken"] + ";sessionid=" + cookies["sessionid"]
-                with open("account.json", "w", encoding="utf-8") as f:
-                    json.dump(account, f, ensure_ascii=False, indent=4)
-            else:
-                config.set("config", "cookies", cookies)
-                with open("config.ini", "w", encoding="utf-8") as cookies:
-                    config.write(cookies)
-            log("info", "保存 cookie 成功")
-        else:
-            log("error", "登录失败, 请检查用户名或密码")
-            log("error", "错误信息:")
-            log("error", post)
-            return "error"
 
 
 def get_info():
@@ -178,13 +148,104 @@ def get_info():
         log("error", "获取失败! ")
 
 
-def problem_list(page, keywords):
+def signin():
+    post = json.loads(requests.post(url=sighin, headers=headers).text)
+    if post["data"] == "Singined":
+        log("info", "稳健佬, 您已经签过到了呀~明天再来哦")
+    elif post["data"]["info"] == "Success":
+        log("info", "签到成功")
+        log("info", "获得稳点: " + str(post["data"]["experience"]))
+    else:
+        log("error", "签到失败")
+        log("error", "错误信息:")
+        log("error", post)
+        return "error"
+    sign_info = json.loads(requests.get(url=sighin, headers=headers).text)
+    if sign_info["error"] == None:
+        log("info", "连续签到天数: " + str(sign_info["data"]["continue_sighin_days"]))
+        log("info", "上次签到时间: " + str(sign_info["data"]["last_sighin_time"]))
+        log("info", "当前稳点: " + str(info["data"]["experience"]))
+        log("info", "当前等级: " + level(int(json.dumps(info["data"]["experience"]))))
+    else:
+        log("error", "查询签到状态失败")
+        log("error", "错误信息:")
+        log("error", sign_info)
+        return "error"
+
+
+def announcement(page=1):
+    print("\033[0;30m                \033[1;34m[公告]\033[0m")
+    offset = (page - 1) * 10
+    noticelist = json.loads(requests.get(url=notice + "?limit=10&offset=" + str(offset), headers=headers).text)
+    notice_detail = prettytable.PrettyTable(["id", "标题", "创建时间", "上次更新时间", "创建者"])
+    for n in range(len(noticelist["data"]["results"])):
+        #_id = noticelist["data"]["results"][n]["id"]
+        title = noticelist["data"]["results"][n]["title"]
+        content = cls.sub('', noticelist["data"]["results"][n]["content"])
+        create_time = noticelist["data"]["results"][n]["create_time"][:10] + " " + noticelist["data"]["results"][n]["create_time"][11:19]
+        last_update_time = noticelist["data"]["results"][n]["last_update_time"][:10] + " " + noticelist["data"]["results"][n]["last_update_time"][11:19]
+        created_by = noticelist["data"]["results"][n]["created_by"]["username"]
+        notice_detail.add_row([n, title, create_time, last_update_time, created_by])
+    log("info", "\n" + str(notice_detail))
+    log("info", "                              第 " + str(page) + " 页 共 " + str(noticelist["data"]["total"] // 10 + 1) + " 页")
+    while True:
+        log("info", "欢迎来到公告, 帮助中心:")
+        log("info", "goto 公告序号 查看指定公告")
+        log("info", "page 页码    跳转指定页码")
+        log("info", "return       返回")
+        print("\033[1;36m[" + info["data"]["user"]["username"] + "]\033[0m", end="")
+        into = input("> ")
+        if into == "return":
+            return
+        elif into[:4] == "page" and len(into) > 5 and into[5:].isdigit():
+            announcement(int(into[5:]))
+            return
+        elif into[:4] == "goto" and len(into) > 5 and into[5:].isdigit():
+            log("info", "标题: " + noticelist["data"]["results"][int(into[5:])]["title"])
+            log("info", "内容: " + cls.sub('', noticelist["data"]["results"][int(into[5:])]["content"]) + "\n")
+        else:
+            log("error", "输入错误, 请重新输入")
+
+
+def post_login(username, password):
+    log("info", "正在登录中......")
+    headers["Cookie"] = "csrftoken=gnW1iou7O0fvueeGyENEEfDV4mPdob6BnISwCxMx3Li6pXpsmner56kwGn18denc"
+    headers["X-CSRFToken"] = "gnW1iou7O0fvueeGyENEEfDV4mPdob6BnISwCxMx3Li6pXpsmner56kwGn18denc"
+    try:
+        response = requests.post(url=login, json={"username": username, "password": password}, headers=headers)
+        post = json.loads(response.text)
+    except:
+        log("error", "登录失败,请检查配置文件")
+        return "error"
+    else:
+        if post["data"] == "Succeeded":
+            log("info", "登录成功")
+            cookies = requests.utils.dict_from_cookiejar(response.cookies)
+            cookies = "csrftoken=" + cookies["csrftoken"] + ";sessionid=" + cookies["sessionid"]
+            headers["Cookie"] = cookies
+            headers["X-CSRFToken"] = cookies[10:74]
+            if config["config"]["auto_signin"] == "True":
+                account[i]["cookies"] = "csrftoken=" + cookies["csrftoken"] + ";sessionid=" + cookies["sessionid"]
+                with open("account.json", "w", encoding="utf-8") as f:
+                    json.dump(account, f, ensure_ascii=False, indent=4)
+            else:
+                config.set("config", "cookies", cookies)
+                with open("config.ini", "w", encoding="utf-8") as cookies:
+                    config.write(cookies)
+            log("info", "保存 cookie 成功")
+        else:
+            log("error", "登录失败, 请检查用户名或密码")
+            log("error", "错误信息:")
+            log("error", post)
+            return "error"
+
+
+def problem_list(page=1, keyword=""):
     print("\033[0;30m                \033[1;34m[题目列表]\033[0m")
     offset = (page - 1) * 20
-    problemlist = json.loads(requests.get(url=gt_problem + "?limit=20&offset=" + str(offset) + "&keywords=" + keywords, headers=headers).text)
+    problemlist = json.loads(requests.get(url=gt_problem + "?limit=20&offset=" + str(offset) + "&keyword=" + keyword, headers=headers).text)
     problem_detail = prettytable.PrettyTable(["状态", "题号", "题目", "难度", "提交总数", "通过率"])
-    total = problemlist["data"]["total"]
-    for n in range(min(20, total)):
+    for n in range(len(problemlist["data"]["results"])):
         my_status = problemlist["data"]["results"][n]["my_status"]
         _id = problemlist["data"]["results"][n]["_id"]
         title = problemlist["data"]["results"][n]["title"]
@@ -192,12 +253,12 @@ def problem_list(page, keywords):
         submission_number = problemlist["data"]["results"][n]["submission_number"]
         accepted_number = problemlist["data"]["results"][n]["accepted_number"]
         if submission_number == 0:
-            acv = "0%"
+            acv = "0.00%"
         else:
-            acv = str(int(accepted_number) / int(submission_number) * 100)[:5] + "%"
+            acv = str(format(float(accepted_number) / float(submission_number), ".2f")) + "%"
         problem_detail.add_row([color(my_status), _id, title, color(difficulty), submission_number, acv])
     log("info", "\n" + str(problem_detail))
-    log("info", "                              第 " + str(page) + " 页 共 " + str(total // 20 + 1) + " 页")
+    log("info", "                              第 " + str(page) + " 页 共 " + str(problemlist["data"]["total"] // 20 + 1) + " 页")
     while True:
         log("info", "欢迎来到题目列表, 帮助中心: ")
         log("info", "goto 题号    查看题号题目")
@@ -208,14 +269,14 @@ def problem_list(page, keywords):
         into = input("> ")
         if into == "return":
             return
-        elif into[:4] == "page" and len(into) > 5 and into[6:].isdigit():
-            problem_list(int(into[5:]))
+        elif into[:4] == "page" and len(into) > 5 and into[5:].isdigit():
+            problem_list(int(into[5:]), keyword)
+            return
         elif into[:4] == "goto" and len(into) > 5:
-            problem_info(into[5:], "")
-        elif into[:6] == "search" and len(into) > 8:
+            problem_info(into[5:])
+        elif into[:6] == "search" and len(into) > 7:
             problem_list(1, into[7:])
-        #problem_id = titlelist.get(into, "None")
-        #if problem_id != "None":
+            return
         else:
             log("error", "输入错误, 请重新输入")
 
@@ -223,7 +284,6 @@ def problem_list(page, keywords):
 def problem_info(_id):
     global probleminfo
     print("\033[0;30m                \033[1;34m[题目详细]\033[0m")
-    cls = re.compile(r'<[^>]+>', re.S)
     probleminfo = json.loads(requests.get(url=gt_problem + "?problem_id=" + _id, headers=headers).text)
     log("info", cls.sub('', "题目: " + probleminfo["data"]["title"]))
     log("info", cls.sub('', "描述: " + probleminfo["data"]["description"]))
@@ -299,9 +359,8 @@ def submission(submission_id):
         log("info", "提交状态: " + color(submissioninfo["data"]["result"]))
         if submissioninfo["data"]["result"] != -2 and submissioninfo["data"]["result"] != 5:
             log(
-                "info", "时间: " + str(submissioninfo["data"]["statistic_info"]["time_cost"]) + "ms   内存: " +
-                str(submissioninfo["data"]["statistic_info"]["memory_cost"] // 1048576) + "MB   语言: " + submissioninfo["data"]["language"] +
-                "   提交者: " + str(submissioninfo["data"]["username"]))
+                "info", "时间: " + str(submissioninfo["data"]["statistic_info"]["time_cost"]) + "ms   内存: " + str(submissioninfo["data"]["statistic_info"]["memory_cost"] // 1048576) + "MB   语言: " +
+                submissioninfo["data"]["language"] + "   提交者: " + str(submissioninfo["data"]["username"]))
             log("info", "各个评测点状态: ")
             submission_list = prettytable.PrettyTable(["测试点", "状态", "内存", "CPU用时", "真实用时", "分数", "返回值"])
             id = 0
@@ -333,12 +392,7 @@ def submission(submission_id):
             print("\033[1;36m[" + info["data"]["user"]["username"] + "]\033[0m", end="")
             into = input("> ")
             if into == "share":
-                requests.put(url=tj_problem,
-                             data=json.dumps({
-                                 "id": submission_id,
-                                 "shared": bool(1 - submissioninfo["data"]["shared"])
-                             }),
-                             headers=headers)
+                requests.put(url=tj_problem, data=json.dumps({"id": submission_id, "shared": bool(1 - submissioninfo["data"]["shared"])}), headers=headers)
                 submissioninfo = json.loads(requests.get(url=tj_problem + "?id=" + submission_id, headers=headers).text)
                 log("info", "当前分享状态: " + str(submissioninfo["data"]["shared"]))
             elif into == "return":
@@ -347,37 +401,7 @@ def submission(submission_id):
                 log("error", "输入错误, 请重新输入")
 
 
-# 签到
-
-
-def signin():
-    post = json.loads(requests.post(url=sighin, headers=headers).text)
-    if post["data"] == "Singined":
-        log("info", "稳健佬, 您已经签过到了呀~明天再来哦")
-    elif post["data"]["info"] == "Success":
-        log("info", "签到成功")
-        log("info", "获得稳点: " + str(post["data"]["experience"]))
-    else:
-        log("error", "签到失败")
-        log("error", "错误信息:")
-        log("error", post)
-        return "error"
-    sign_info = json.loads(requests.get(url=sighin, headers=headers).text)
-    if sign_info["error"] == None:
-        log("info", "连续签到天数: " + str(sign_info["data"]["continue_sighin_days"]))
-        log("info", "上次签到时间: " + str(sign_info["data"]["last_sighin_time"]))
-        log("info", "当前稳点: " + str(info["data"]["experience"]))
-        log("info", "当前等级: " + level(int(json.dumps(info["data"]["experience"]))))
-    else:
-        log("error", "查询签到状态失败")
-        log("error", "错误信息:")
-        log("error", sign_info)
-        return "error"
-
-
 # 计算等级
-
-
 def level(experience):
     if experience >= 0 and experience <= 99:
         return "\033[1;46m小白兔\033[0m"
@@ -450,7 +474,6 @@ def auto_sign():
 
 
 if __name__ == '__main__':
-    # 主菜单
     try:
         menu()
     except KeyboardInterrupt:

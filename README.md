@@ -7,17 +7,15 @@
 - [x] 获取基本信息
 - [x] 做题(部分题目显示有问题)
 - [x] 日志
+- [x] 公告
 
 ### TODO
 
-- [ ] 公告
 - [ ] 比赛
-- [ ] 提交
-- [ ] 状态
-- [ ] 公告
+- [ ] 提交状态
 - [ ] 排名
 - [ ] 在线 IDE
-- [ ] 关于
+- [ ] 其他
 
 ## 使用教程
 
@@ -54,9 +52,18 @@ python OnlineJudge-command.py
 帮助中心:
 cookie    重新获取 cookie
 info      获取基本信息
-problem   题目列表
 signin    签到
+notice    公告
+problem   题目列表
 exit      退出
+```
+
+- ## [公告
+
+```
+goto 公告序号  查看指定公告
+page 页码      跳转指定页码
+return        返回
 ```
 
 - ## [题目列表]
